@@ -1,0 +1,17 @@
+-app
+--calculations
+---__init__.py
+---account_info.py
+---earnings.py
+---etf_dispersion.py
+---relative_value.py
+--static
+---IV30_Ratios_2023-08-23 13:07:55.html
+---IV60_Ratios_2023-08-23 13:07:59.html
+---IV90_Ratios_2023-08-23 13:08:01.html
+---css
+----style.css
+--templates
+---index.html
+--__init__.py
+--main.py

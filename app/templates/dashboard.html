@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Include Bootstrap 5 CSS and additional styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #333;
+            color: white;
+        }
+
+        .navbar {
+            background-color: #222;
+        }
+
+        .navbar-dark .navbar-toggler-icon {
+            background-color: #fff;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .panel {
+            background-color: #444;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Additional styling for grid elements */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 columns */
+            gap: 20px; /* Gap between cells */
+        }
+
+        /* Customize panel headers */
+        .panel-header {
+            font-size: 18px;
+        }
+
+        /* Customize percentiles */
+        .percentile {
+            font-size: 18px;
+        }  
+
+        /* Customize rolling returns and IV Rank */
+        .value {
+            font-size: 24px;
+        }
+
+        .value.red {
+            color: indianred; /* Red */
+        }
+
+        .value.green {
+            color: lightseagreen; /* Green */
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">Dark Dashboard</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="home">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Settings</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- Top Section: VIX Price, % Change, Percentile -->
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <div class="text-center panel">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="mr-2">
+                        <h1>VIX:</h1>
+                    </div>
+                    <div class="mr-2">
+                        <h1 class="{{ 'text-success' if vix_change > 0 else 'text-danger' }}">{{ "%.2f"|format(vix_price) }}</h1>
+                    </div>
+                    <div class="mr-2">
+                        <h2 class="{{ 'text-success' if vix_change > 0 else 'text-danger' }}">
+                            {% if vix_change > 0 %}+{% endif %}{{ "%.2f"|format(vix_change) }}%
+                        </h2>
+                    </div>
+                    <div>
+                        <h2 class="percentile
+                        {% if vix_percentile < 33.33 %}
+                            text-danger
+                        {% elif vix_percentile < 66.67 %}
+                        {% else %}
+                            text-success
+                        {% endif %}">
+                        {{ "%.2f"|format(vix_percentile) }}%</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+
+
+
+
+
+<!-- Middle Section: 2x4 grid for VIX futures and metrics -->
+<div class="row">
+    <!-- Loop through vix_futures_data and generate the grid -->
+    {% for data in ratios %}
+    <div class="col-md-3">
+        <div class="text-center panel">
+            <h4 class="panel-header">{{ data.name }}</h4>
+            <p class="value">{{ "%.2f"|format(data.value) }}</p>
+            {% if data.percentile > 0 %}
+                <p class="percentile
+                    {% if data.percentile < 33.33 %}
+                        text-danger
+                    {% elif data.percentile < 66.67 %}
+                    {% else %}
+                        text-success
+                    {% endif %}">
+                    {{  "%.2f"|format(data.percentile) }}%
+                </p>
+            {% else %}
+                <p class="percentile"> % </p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+<!-- Bottom Section: 2x1 grid for rolling returns and IV Rank -->
+<div class="row mt-4">
+    <!-- Left Column for rolling_returns_data -->
+    <div class="col-md-6">
+        {% for data in rolling_returns_data %}
+        <div class="text-center panel">
+            <h4 class="panel-header">SPY {{ data.name }}</h4>
+            <p class="value {{ 'text-danger' if data.value < 0 else 'text-success' }}">{{ "%.2f"|format(data.value) }}%</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Right Column for iv_rank_data -->
+    <div class="col-md-6">
+        {% for data in iv_rank_data %}
+        <div class=" text-center panel">
+            <h4 class="panel-header">{{ data.name }}</h4>
+            <p class="value
+                {% if data.value < 33.33 %}
+                    text-success
+                {% elif data.value < 66.67 %}
+                {% else %}
+                    text-danger
+                {% endif %}">
+                {{ "%.2f"|format(data.value) }}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+<!-- Include Bootstrap 5 JavaScript (including Popper.js) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+</body>
+</html>
